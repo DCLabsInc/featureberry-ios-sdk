@@ -192,6 +192,7 @@ public enum FeatureBerry {
     private static var features: CachedFeatures?
     private static var isFetchingWhatsNewData = false
     static var isPresentingWhatsNew = false
+    static let userIsTestingChangedNotification = Notification.Name("FeatureBerry.userIsTestingChanged")
     /// Called on the main actor when the user's testing mode changes.
     public static var onUserIsTestingChanged: ((Bool) -> Void)?
 
@@ -199,6 +200,7 @@ public enum FeatureBerry {
     public static var userIsTesting = false {
         didSet {
             if userIsTesting != oldValue {
+                NotificationCenter.default.post(name: userIsTestingChangedNotification, object: nil)
                 onUserIsTestingChanged?(userIsTesting)
             }
         }

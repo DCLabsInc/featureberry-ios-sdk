@@ -5,6 +5,23 @@ import Testing
 import UIKit
 #endif
 
+private final class NotificationCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = 0
+
+    func increment() {
+        lock.lock()
+        defer { lock.unlock() }
+        value += 1
+    }
+
+    var count: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return value
+    }
+}
+
 @Suite struct FeatureFlagClientTests {
     @Test func horizonRequestUsesExpectedEndpointAndQueryParameters() throws {
         let client = FeatureBerryFeatureClient(
@@ -154,9 +171,16 @@ import UIKit
         FeatureBerry.onUserIsTestingChanged = nil
         FeatureBerry.userIsTesting = false
         var changes: [Bool] = []
+        let notifications = NotificationCounter()
+        let observer = NotificationCenter.default.addObserver(
+            forName: FeatureBerry.userIsTestingChangedNotification, object: nil, queue: nil
+        ) { _ in
+            notifications.increment()
+        }
         FeatureBerry.onUserIsTestingChanged = { changes.append($0) }
         defer {
             FeatureBerry.onUserIsTestingChanged = nil
+            NotificationCenter.default.removeObserver(observer)
             FeatureBerry.userIsTesting = false
         }
 
@@ -166,6 +190,7 @@ import UIKit
         FeatureBerry.userIsTesting = false
         #expect(!FeatureBerry.isTestingSessionEnabled)
         #expect(changes == [true, false])
+        #expect(notifications.count == 2)
     }
 
     @Test func expiredHorizonCacheDoesNotEnableAFlag() {

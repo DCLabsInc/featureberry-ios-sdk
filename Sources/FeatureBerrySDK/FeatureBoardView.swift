@@ -242,7 +242,7 @@ private struct FeatureBoardView: View {
                     .background(Color.black, in: RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Signed in as \(email). Open FeatureBerry login")
+                .accessibilityLabel("Signed in as \(email). Open 🍓FeatureBerry login")
             }
         }
         .padding(.horizontal)
@@ -463,7 +463,7 @@ private struct FeatureBoardSignIn: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Sign in to FeatureBerry")
+            Text("Sign in to 🍓FeatureBerry")
                 .font(.title2.bold())
             Text("Sign in with Apple to vote or submit a feature suggestion.")
                 .multilineTextAlignment(.center)

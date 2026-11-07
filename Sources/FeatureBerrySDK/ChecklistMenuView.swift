@@ -50,12 +50,7 @@ private struct TestBarberBrand: View {
             if poweredBy {
                 Text("Powered by")
             }
-            Image("featureberry-logo", bundle: .module)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 17, height: 17)
-                .accessibilityHidden(true)
-            Text("FeatureBerry")
+            Text("🍓FeatureBerry")
         }
         .font(.headline)
         .foregroundStyle(.primary)

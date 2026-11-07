@@ -107,21 +107,29 @@ private struct WhatsNewView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Text(release.releaseName).font(.title2.bold())
                     featureSection("New features", status: "Shipped")
+                    Divider()
                     featureSection("Now testing", status: "Testing")
                     if release.features.contains(where: { $0.status == "Testing" }) {
                         Toggle("Show test features", isOn: $testingEnabled)
                             .onChange(of: testingEnabled) { _, value in
                                 FeatureBerry.userIsTesting = value
                             }
+                            .tint(.pink)
                     }
                     #if canImport(ReplayKit)
-                    if let codeword = release.codeword,
+                    if testingEnabled,
+                       let codeword = release.codeword,
                        FeatureBerrySessionManager.shared.isConfiguredForRelease(codeword: codeword) {
                         FeatureBerrySessionButton(title: "Perform test session")
                     }
                     #endif
                     Button("Continue") { showReviews = true }
                         .buttonStyle(.borderedProminent)
+                        .tint(.pink)
+                        .frame(maxWidth: .infinity)
+                    Text("Powered by 🍓FeatureBerry")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }
                 .padding()
@@ -130,7 +138,10 @@ private struct WhatsNewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Close") { dismiss() }
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel("Close")
                 }
             }
             .navigationDestination(isPresented: $showReviews) {
@@ -138,6 +149,9 @@ private struct WhatsNewView: View {
             }
         }
         .onAppear(perform: onPresented)
+        .onReceive(NotificationCenter.default.publisher(for: FeatureBerry.userIsTestingChangedNotification)) { _ in
+            testingEnabled = FeatureBerry.userIsTesting
+        }
     }
 
     @ViewBuilder
@@ -236,11 +250,11 @@ private struct ShowcasedReviewsView: View {
             Text(String(repeating: "★", count: max(0, min(review.rating, 5))))
                 .foregroundStyle(.yellow)
                 .accessibilityLabel("\(review.rating) out of 5 stars")
-            Text(review.title).font(.headline)
-            Text(review.reviewText)
-            Text(review.author).foregroundStyle(.secondary)
+            Text(review.title).font(.headline).lineLimit(2).truncationMode(.tail)
+            Text(review.reviewText).lineLimit(5).truncationMode(.tail)
+            Text(review.author).foregroundStyle(.secondary).lineLimit(1).truncationMode(.tail)
         }
-        .frame(width: 260, alignment: .leading)
+        .frame(width: 260, height: 240, alignment: .topLeading)
         .padding()
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
